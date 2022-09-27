@@ -56,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 arrEmployee.add(nvPartTime);
                 break;
         }
+        edtID.setText("");
+        edtInputName.setText("");
+        edtID.requestFocus();
     }
 
     @Override
