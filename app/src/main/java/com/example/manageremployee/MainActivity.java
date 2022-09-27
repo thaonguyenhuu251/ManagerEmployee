@@ -1,26 +1,40 @@
 package com.example.manageremployee;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioGroup;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    EditText edtID,edtInputName;
+    EditText edtID, edtInputName;
     Button btnAdd;
     RadioGroup radGroup;
     ListView lvEmployee;
     ArrayList<Employee> arrEmployee = new ArrayList<Employee>();
-    ArrayAdapter<Employee> adapter  = null;
+    ArrayAdapter<Employee> adapter = null;
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,11 +52,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnAdd = findViewById(R.id.button);
         radGroup = findViewById(R.id.radioGroup);
         lvEmployee = findViewById(R.id.lvEmployee);
+        lvEmployee.setOnItemClickListener(new MyListViewEvent());
+        lvEmployee.setOnItemLongClickListener(new MyListViewEvent());
     }
 
     private void setDataEmployee() {
         int id = radGroup.getCheckedRadioButtonId();
-        switch (id){
+        switch (id) {
             case R.id.rbSecond:
                 EmployeeFullTime nvFullTime = new EmployeeFullTime();
                 nvFullTime.setId(edtID.getText().toString());
@@ -50,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 arrEmployee.add(nvFullTime);
                 break;
             case R.id.rbThree:
-                EmployeePartTime nvPartTime =new EmployeePartTime();
+                EmployeePartTime nvPartTime = new EmployeePartTime();
                 nvPartTime.setId(edtID.getText().toString());
                 nvPartTime.setName(edtInputName.getText().toString());
                 arrEmployee.add(nvPartTime);
@@ -67,14 +83,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         hideKeyboard(this);
     }
 
-    public static void hideKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = activity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(activity);
+    private class MyListViewEvent implements
+            AdapterView.OnItemClickListener,
+            AdapterView.OnItemLongClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            Toast.makeText(MainActivity.this, arrEmployee.get(i).toString(), Toast.LENGTH_LONG).show();
         }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+            arrEmployee.remove(i);
+            adapter.notifyDataSetChanged();
+            return false;
+        }
     }
 }
